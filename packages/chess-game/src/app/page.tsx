@@ -49,27 +49,27 @@ const pieceSymbols: Record<PieceColor, Record<PieceType, string>> = {
 const initializeBoard = (): Board => {
   const board: Board = Array(8).fill(null).map(() => Array(8).fill(null));
   
-  // Black pieces
+  // Black pieces (row 0 - top of board)
   board[0] = [
     { type: 'rook', color: 'black' },
     { type: 'knight', color: 'black' },
     { type: 'bishop', color: 'black' },
-    { type: 'queen', color: 'black' },
-    { type: 'king', color: 'black' },
+    { type: 'king', color: 'black' },    // King on e8 (column 4)
+    { type: 'queen', color: 'black' },   // Queen on d8 (column 3)
     { type: 'bishop', color: 'black' },
     { type: 'knight', color: 'black' },
     { type: 'rook', color: 'black' }
   ];
   board[1] = Array(8).fill(null).map(() => ({ type: 'pawn' as PieceType, color: 'black' as PieceColor }));
   
-  // White pieces
+  // White pieces (row 7 - bottom of board)
   board[6] = Array(8).fill(null).map(() => ({ type: 'pawn' as PieceType, color: 'white' as PieceColor }));
   board[7] = [
     { type: 'rook', color: 'white' },
     { type: 'knight', color: 'white' },
     { type: 'bishop', color: 'white' },
-    { type: 'queen', color: 'white' },
-    { type: 'king', color: 'white' },
+    { type: 'king', color: 'white' },    // King on e1 (column 4)
+    { type: 'queen', color: 'white' },   // Queen on d1 (column 3)
     { type: 'bishop', color: 'white' },
     { type: 'knight', color: 'white' },
     { type: 'rook', color: 'white' }
@@ -444,15 +444,19 @@ export default function ChessGame() {
           {/* Game Info Panel */}
           <div className="w-full lg:w-64 space-y-4">
             {/* Black Player Timer */}
-            <div className={`bg-slate-800 rounded-lg p-4 border-2 ${gameState.currentPlayer === 'black' && !gameState.gameOver ? 'border-purple-400' : 'border-transparent'}`}>
+            <div className={`bg-slate-800/80 rounded-lg p-4 border-2 transition-all ${
+              gameState.currentPlayer === 'black' && !gameState.gameOver 
+                ? 'border-purple-400 shadow-lg shadow-purple-500/50' 
+                : 'border-slate-700 opacity-70'
+            }`}>
               <div className="flex items-center justify-between">
-                <span className="text-white font-semibold">Black</span>
-                <span className="text-2xl font-mono text-white">{formatTime(gameState.blackTime)}</span>
+                <span className="text-white font-semibold text-sm uppercase tracking-wide">Black</span>
+                <span className="text-3xl font-mono font-bold text-white">{formatTime(gameState.blackTime)}</span>
               </div>
             </div>
 
             {/* Game Status */}
-            <div className="bg-slate-800 rounded-lg p-4">
+            <div className="bg-slate-800/80 rounded-lg p-4 border border-slate-700">
               {gameState.gameOver ? (
                 <div className="text-center">
                   <p className="text-xl font-bold text-white mb-2">Game Over!</p>
@@ -471,10 +475,14 @@ export default function ChessGame() {
             </div>
 
             {/* White Player Timer */}
-            <div className={`bg-slate-800 rounded-lg p-4 border-2 ${gameState.currentPlayer === 'white' && !gameState.gameOver ? 'border-purple-400' : 'border-transparent'}`}>
+            <div className={`bg-slate-800/80 rounded-lg p-4 border-2 transition-all ${
+              gameState.currentPlayer === 'white' && !gameState.gameOver 
+                ? 'border-purple-400 shadow-lg shadow-purple-500/50' 
+                : 'border-slate-700 opacity-70'
+            }`}>
               <div className="flex items-center justify-between">
-                <span className="text-white font-semibold">White</span>
-                <span className="text-2xl font-mono text-white">{formatTime(gameState.whiteTime)}</span>
+                <span className="text-white font-semibold text-sm uppercase tracking-wide">White</span>
+                <span className="text-3xl font-mono font-bold text-white">{formatTime(gameState.whiteTime)}</span>
               </div>
             </div>
 
@@ -498,8 +506,8 @@ export default function ChessGame() {
 
           {/* Chess Board */}
           <div className="flex-shrink-0">
-            <div className="bg-slate-800 p-4 rounded-lg shadow-2xl">
-              <div className="grid grid-cols-8 gap-0 w-full max-w-[600px] aspect-square">
+            <div className="bg-slate-800/50 p-3 rounded-xl shadow-2xl border border-slate-700">
+              <div className="grid grid-cols-8 gap-0 w-full max-w-[640px] aspect-square">
                 {gameState.board.map((row, rowIndex) =>
                   row.map((piece, colIndex) => {
                     const isLight = (rowIndex + colIndex) % 2 === 0;
@@ -511,12 +519,12 @@ export default function ChessGame() {
                       <div
                         key={`${rowIndex}-${colIndex}`}
                         className={`
-                          relative flex items-center justify-center cursor-pointer select-none
-                          ${isLight ? 'bg-amber-100' : 'bg-amber-700'}
-                          ${isSelected ? 'ring-4 ring-blue-400' : ''}
-                          ${isValidMoveSquare ? 'ring-4 ring-green-400' : ''}
+                          relative grid place-items-center cursor-pointer select-none
+                          ${isLight ? 'bg-[#f0d9b5]' : 'bg-[#b58863]'}
+                          ${isSelected ? 'ring-4 ring-inset ring-blue-500' : ''}
+                          ${isValidMoveSquare ? 'ring-4 ring-inset ring-green-500' : ''}
                           ${isDragging ? 'opacity-50' : ''}
-                          hover:brightness-110 transition-all
+                          hover:brightness-105 transition-all
                         `}
                         onClick={() => handleSquareClick(rowIndex, colIndex)}
                         onDragOver={handleDragOver}
@@ -527,10 +535,13 @@ export default function ChessGame() {
                             draggable={piece.color === gameState.currentPlayer && !gameState.gameOver}
                             onDragStart={(e) => handleDragStart(e, rowIndex, colIndex)}
                             onDragEnd={handleDragEnd}
-                            className="text-4xl md:text-5xl lg:text-6xl cursor-move select-none"
+                            className="text-5xl md:text-6xl lg:text-7xl cursor-move select-none leading-none"
                             style={{ 
-                              color: piece.color === 'white' ? '#ffffff' : '#000000',
-                              textShadow: piece.color === 'white' ? '0 0 3px #000' : '0 0 3px #fff'
+                              color: piece.color === 'white' ? '#ffffff' : '#1a1a1a',
+                              textShadow: piece.color === 'white' 
+                                ? '0 2px 4px rgba(0,0,0,0.8), 0 0 2px rgba(0,0,0,0.5)' 
+                                : '0 2px 4px rgba(255,255,255,0.6), 0 0 2px rgba(255,255,255,0.4)',
+                              filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))'
                             }}
                           >
                             {pieceSymbols[piece.color][piece.type]}
@@ -556,4 +567,5 @@ export default function ChessGame() {
     </div>
   );
 }
+
 
